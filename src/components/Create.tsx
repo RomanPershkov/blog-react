@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { withRouter, useHistory } from 'react-router-dom';
 import { useAuth0 } from '../contexts/auth0-context';
 
 function Create(): JSX.Element {
     let history = useHistory();
-    const { user, getIdTokenClaims } = useAuth0;
+    const { user, getIdTokenClaims } = useAuth0();
 
     interface IValues {
-        [key: string]: any;
+        [key: string]: any;        
     }
 
     const [author, setAuthor] = useState<string>('');
     const [values, setValues] = useState<IValues>([]);
     const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const [imageRef, setImage] = useState<File | null>(null);
+    const [fileInputLabel, setFileInputLabel] = useState<string>("Выберите файл...");
 
     useEffect(() => {
         if(user) {
             setAuthor(user.name)
         }
     }, [user])
-
+    
     const handleFormSubmission = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         setLoading(true);
@@ -29,7 +31,8 @@ function Create(): JSX.Element {
             title: values.title,
             description: values.description,
             body: values.body,
-            author
+            author: author,
+            image: values.image
         }
 
         const submitSuccess: boolean = await submitForm(formData);
@@ -53,7 +56,7 @@ function Create(): JSX.Element {
                 }),
                 body: JSON.stringify(formData)
             });
-
+            
             return response.ok;
         } catch (ex) {
             return false;
@@ -64,9 +67,39 @@ function Create(): JSX.Element {
         setValues({...values, ...formValues})
     }
 
-    const handleInputChanges = (e: React.FormEvent<HTMLInputElement>) => {
+    const handleInputChanges = (e: React.FormEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
         e.preventDefault();
         setFormValues({ [e.currentTarget.name]: e.currentTarget.value })
+    }
+
+    const handleFileInputChanges = (e: FileList | null) =>  {
+        if(e === null || e.item(0) === null){
+            return;
+        }
+
+        const validFileExtensions = [".jpg", ".jpeg", ".bmp", ".gif", ".png"];
+        const image: File | null = e.item(0);
+        let extValid = false;
+        
+        for(var i = 0; i < validFileExtensions.length; i++){
+            if(image !== null){
+                if (image.name.substr(image.name.length - validFileExtensions[i].length, validFileExtensions[i].length).toLowerCase() == validFileExtensions[i].toLowerCase()) {
+                    extValid = true;
+                    break;
+                }
+            }
+            else { break; }
+        }
+        if(extValid){
+            setImage(e.item(0))
+            setFormValues({ ['image']: image })
+            
+            setFileInputLabel(`${e.item.name}`)
+            
+            console.log(e.item(0))
+            console.log(values.image)
+            console.log(imageRef)
+        }
     }
 
     return (
@@ -84,23 +117,29 @@ function Create(): JSX.Element {
                     </div>
                 )}
                 <form id={"create-post-form"} onSubmit={handleFormSubmission} noValidate={true}>
-                    <div className="form-group col-md-12">
-                        <label htmlFor="title"> Оглавление </label>
-                        <input type="text" id="title" onChange={(e) => handleInputChanges(e)} name="title" className="form-control" placeholder="Ввседите оглавление" />
+                    <div className="input-group mb-3 col-md-12">
+                    <input type="file" id="image" onChange={ (e) => handleFileInputChanges(e.target.files) } name="image" className="custom-file-input" aria-describedby={fileInputLabel} />
+                        <div className="input-group-prepend">
+                            <label id="fileInput" className="custom-file-label">{fileInputLabel}</label>
+                        </div>
                     </div>
-                    <div className="form-group col-md-12">
-                        <label htmlFor="description"> Описание </label>
-                        <input type="text" id="description" onChange={(e) => handleInputChanges(e)} name="description" className="form-control" placeholder="Введите описание" />
+                    <div className="input-group mb-3 col-md-12">
+                    <input type="text" id="title" aria-describedby="scr1" onChange={(e) => handleInputChanges(e)} name="title" className="form-control" />
+                        <div className="input-group-prepend">
+                            <span id="scr1" className="input-group-text">Тема</span>
+                        </div>
                     </div>
-                    <div className="form-group col-md-12">
-                        <label htmlFor="body"> Содержимое </label>
-                        <input type="text" id="body" onChange={(e) => handleInputChanges(e)} name="body" className="form-control" placeholder="Введите содержимое" />
+                    <div className="input-group mb-3 col-md-12">
+                    <input type="text" id="description" onChange={(e) => handleInputChanges(e)} name="description" className="form-control" aria-describedby="" />
+                        <div className="input-group-prepend">
+                            <span className="input-group-text">Описание</span>
+                        </div>
                     </div>
-                    <div className="form-group col-md-12">
-                        <label htmlFor="author"> Автор </label>
-                        <input type="text" id="author" defaultValue={author} onChange={(e) => handleInputChanges(e)} name="author" className="form-control" />
-                    </div>
-                    <div className="form-group col-md-4 pull-right">
+                    <div className="input-group mb-3 col-md-12 col-auto">
+                    <textarea id="body" placeholder="Содержимое" onChange={(e) => handleInputChanges(e)} name="body" className="form-control" />
+                                               
+                    </div>                    
+                    <div className="input-group mb-3 col-md-4 pull-right">
                         <button className="btn btn-success" type="submit">
                             Опубликовать
                         </button>

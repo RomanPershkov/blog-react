@@ -1,24 +1,24 @@
 import React from 'react';
-import logo from './logo.svg';
+import Navbar from './components/Navbar';
 import './App.css';
+import { Route, Switch } from 'react-router';
+import Home from './components/Home';
+import Post from './components/Post';
+import Edit from './components/Edit';
+import Create from './components/Create';
 
-function App() {
+function App(): JSX.Element {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Navbar />
+        <div className={'container'}>
+          <Switch>
+            <Route path={"/"} exact={true} component={Home} />
+            <Route path={"/post/:postId"} component={Post} />
+            <Route path={"/edit/:postId"} component={Edit} />
+            <Route path={"/create"} component={Create} />
+          </Switch>
+        </div>
     </div>
   );
 }

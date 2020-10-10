@@ -73,9 +73,10 @@ export class Auth0Provider extends Component<{}, IState> {
           user,
           loginWithRedirect: (...p: any) => auth0Client.loginWithRedirect(...p),
           getTokenSilently: (...p: any) => auth0Client.getTokenSilently(...p),
-          getIdTokenClaims: (...p: any) => auth0Client.getIdTokenClaims(...p)
+          getIdTokenClaims: (...p: any) => auth0Client.getIdTokenClaims(...p),
+          logout: (...p: any) => auth0Client.logout(...p)
       };
 
-      return <Auth0Client.Provider value={configObject}>{children}></Auth0Client.Provider>
+      return <Auth0Context.Provider value={configObject}>{children}</Auth0Context.Provider>
     }
 }
