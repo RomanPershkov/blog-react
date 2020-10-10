@@ -1,8 +1,15 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { withRouter, useHistory } from 'react-router-dom';
-import { useAuth0 } from '../contexts/auth0-context';
+import { useAuth0 } from '../../contexts/auth0-context';
+import {
+    Text,
+    SmallText,
+} from './styles';
+import  {
+    Button
+} from 'antd';
 
-function Create(): JSX.Element {
+const Create = (): JSX.Element => {
     let history = useHistory();
     const { user, getIdTokenClaims } = useAuth0();
 
@@ -22,6 +29,10 @@ function Create(): JSX.Element {
             setAuthor(user.name)
         }
     }, [user])
+
+    useEffect(() => {
+        console.log('imageRef', imageRef);
+    }, [imageRef]);
     
     const handleFormSubmission = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
@@ -91,19 +102,22 @@ function Create(): JSX.Element {
             else { break; }
         }
         if(extValid){
-            setImage(e.item(0))
-            setFormValues({ ['image']: image })
+            setImage(e.item(0));
+            setFormValues({ ['image']: image });
             
-            setFileInputLabel(`${e.item.name}`)
+            setFileInputLabel(`${e.item.name}`);
             
-            console.log(e.item(0))
-            console.log(values.image)
-            console.log(imageRef)
+            // console.log(e.item(0))
+            // console.log(values.image)
+            // console.log(imageRef)
         }
     }
 
     return (
         <div>
+            <Text>Hello</Text>
+            <SmallText>Hello Small</SmallText>
+            <Button size="large" type="primary">Click me!</Button>
             <div className={"col-md-12 form-wrapper"}>
                 <h2>Создать пост</h2>
                 {!submitSuccess && (

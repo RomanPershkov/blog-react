@@ -1,11 +1,12 @@
 import React from 'react';
 import Navbar from './components/Navbar';
 import './App.css';
+import 'antd/dist/antd.css';
 import { Route, Switch } from 'react-router';
 import Home from './components/Home';
 import Post from './components/Post';
 import Edit from './components/Edit';
-import Create from './components/Create';
+import Create from './components/create';
 
 function App(): JSX.Element {
   return (
