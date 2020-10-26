@@ -1,12 +1,39 @@
 import React, { useEffect, useState } from "react";
+import { connect, useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "../contexts/auth0-context";
+import { ApplicationState } from "../store";
+import { fetchRequest } from "../store/posts/actions";
+import { IPost } from "../type";
+import * as postsActions from '../store/posts/actions'
 
-function Home(): JSX.Element {
+interface PropsFromState {
+    loading: boolean
+    data: IPost[]
+    errors?: string
+}
+  
+interface PropsFromDispatch {
+    fetchRequest: typeof fetchRequest
+}
+
+type AllProps = PropsFromState & PropsFromDispatch
+
+const mapStateToProps = ({ posts }: ApplicationState) => ({
+    loading: posts.loading,
+    errors: posts.errors,
+    data: posts.posts
+  })
+
+const Home: React.FC<AllProps> = () => {
+    const { posts } = useSelector((state: ApplicationState) => state.posts)
+    const dispatch = useDispatch()
+    const setPosts = () => dispatch(postsActions.fetchRequest)
+
     let history = useHistory();
     const { isAuthenticated, getIdTokenClaims, user} = useAuth0();
-    const [posts, setPosts] = useState<any>();
+    const [postsState, setPostsState] = useState<any>();
 
     const deletePost = async(e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
         e.preventDefault();
@@ -33,7 +60,7 @@ function Home(): JSX.Element {
             const response = await fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/blog/posts`);
             const json = await response.json();
             
-            setPosts(json.reverse());
+            setPostsState(json.reverse());
         }
         fetchPosts();
     }, []);
@@ -43,7 +70,7 @@ function Home(): JSX.Element {
             <div className="container">
                 <div className="card">                    
                     <div className="card-body">
-                        {posts && posts.map((post: {title: React.ReactNode; _id: any; author: any; description: string, date_posted: any;}) => (
+                        {posts && posts.map((post: {title: string; _id: any; author: string; description: string, date_posted: string;}) => (
                             <div className="card width: 18rem;" key={post._id}>
                                 <img className="card-img-top" src={`https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1100&q=80`} alt="Card image cap" />
                                 <div className="single-post post-style-1">
@@ -79,4 +106,4 @@ function Home(): JSX.Element {
         </section>
     );
 }
-export default Home;
+export default connect(mapStateToProps)(Home)
